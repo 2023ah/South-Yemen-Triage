@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>South Yemen Triage & Trauma Card</title>
+    <style>
+        :root { --red: #d9534f; --yellow: #f0ad4e; --green: #5cb85c; --black: #292b2c; --blue: #0275d8; }
+        body { font-family: 'Arial', sans-serif; background: #f0f2f5; margin: 0; padding: 10px; color: #333; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 15px; border-radius: 8px; shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2, h3 { text-align: center; color: var(--blue); border-bottom: 2px solid var(--blue); padding-bottom: 5px; }
+        section { margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
+        label { font-weight: bold; display: block; margin-top: 10px; font-size: 0.9em; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .triage-box { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }
+        .triage-box button { padding: 10px; border: none; color: white; font-weight: bold; border-radius: 4px; cursor: pointer; opacity: 0.6; }
+        .active { opacity: 1 !important; border: 2px solid #000 !important; }
+        .save-btn { background: #25D366; color: white; border: none; width: 100%; padding: 15px; border-radius: 5px; font-size: 1.1em; font-weight: bold; margin-top: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>South Yemen Triage System</h2>
+    <p style="text-align:center; font-weight:bold;">بطاقة إصابات الحوادث (Trauma Patient Card)</p>
+
+    <section>
+        <h3>1. البيانات الأساسية</h3>
+        <label>اسم المصاب (إن وجد) / مجهول</label>
+        <input type="text" id="patientName" placeholder="الاسم أو الوصف">
+        <div class="grid">
+            <div><label>العمر</label><input type="number" id="age"></div>
+            <div><label>الجنس</label><select id="gender"><option>ذكر</option><option>أنثى</option></select></div>
+        </div>
+        <label>وقت الإصابة</label>
+        <input type="time" id="injuryTime">
+    </section>
+
+    <section>
+        <h3>2. تصنيف الحالة (Triage)</h3>
+        <div class="triage-box">
+            <button id="btn-red" style="background:var(--red)" onclick="setTriage('أحمر')">أحمر</button>
+            <button id="btn-yellow" style="background:var(--yellow)" onclick="setTriage('أصفر')">أصفر</button>
+            <button id="btn-green" style="background:var(--green)" onclick="setTriage('أخضر')">أخضر</button>
+            <button id="btn-black" style="background:var(--black)" onclick="setTriage('أسود')">أسود</button>
+        </div>
+        <input type="hidden" id="triageTag">
+    </section>
+
+    <section>
+        <h3>3. التدخلات الطبية المقدمة</h3>
+        <label><input type="checkbox" class="intervention" value="تأمين مجرى الهواء"> تأمين مجرى الهواء (Airway Support)</label>
+        <label><input type="checkbox" class="intervention" value="أكسجين"> أكسجين (O2 Therapy)</label>
+        <label><input type="checkbox" class="intervention" value="إيقاف نزيف/ضغط"> إيقاف نزيف / ضغط مباشر</label>
+        <label><input type="checkbox" class="intervention" value="تركيب تورنيكة"> تركيب تورنيكة (Tourniquet)</label>
+        <label><input type="checkbox" class="intervention" value="سوائل وريدية"> سوائل وريدية (IV Fluids)</label>
+        <label><input type="checkbox" class="intervention" value="تثبيت كسور"> تثبيت كسور / جبيرة</label>
+    </section>
+
+    <section>
+        <h3>4. الأدوية الممنوحة</h3>
+        <label>أدوية (نوع الجرعة ووقتها)</label>
+        <textarea id="meds" rows="2" placeholder="مثال: مورفين 5 ملج، سيفاكسون 1 جم..."></textarea>
+    </section>
+
+    <section>
+        <h3>5. الإخلاء الطبي</h3>
+        <label>المستشفى المستلم</label>
+        <select id="hospital">
+            <option>مستشفى عبود العسكري</option>
+            <option>مستشفى الجمهورية</option>
+            <option>أطباء بلا حدود</option>
+            <option>مستشفى ميداني آخر</option>
+        </select>
+        <label>حالة المصاب عند التحويل</label>
+        <select id="statusAtTransfer">
+            <option>مستقرة</option>
+            <option>غير مستقرة</option>
+            <option>متدهورة</option>
+        </select>
+    </section>
+
+    <button class="save-btn" onclick="sendToWhatsApp()">إرسال التقرير الطبي الكامل ✅</button>
+</div>
+
+<script>
+    function setTriage(color) {
+        document.getElementById('triageTag').value = color;
+        const buttons = document.querySelectorAll('.triage-box button');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        if(color === 'أحمر') document.getElementById('btn-red').classList.add('active');
+        if(color === 'أصفر') document.getElementById('btn-yellow').classList.add('active');
+        if(color === 'أخضر') document.getElementById('btn-green').classList.add('active');
+        if(color === 'أسود') document.getElementById('btn-black').classList.add('active');
+    }
+
+    function sendToWhatsApp() {
+        const name = document.getElementById('patientName').value || "غير معروف";
+        const tag = document.getElementById('triageTag').value || "غير محدد";
+        const meds = document.getElementById('meds').value;
+        const hospital = document.getElementById('hospital').value;
+        
+        let interventions = [];
+        document.querySelectorAll('.intervention:checked').forEach(i => interventions.push(i.value));
+
+        const message = `*تقرير إصابة - South Yemen Triage*%0A` +
+                        `------------------------------%0A` +
+                        `*المصاب:* ${name}%0A` +
+                        `*التصنيف:* ${tag}%0A` +
+                        `*التدخلات:* ${interventions.join('، ') || 'لا يوجد'}%0A` +
+                        `*الأدوية:* ${meds || 'لا يوجد'}%0A` +
+                        `*الوجهة:* ${hospital}%0A` +
+                        `*الحالة عند النقل:* ${document.getElementById('statusAtTransfer').value}%0A` +
+                        `------------------------------%0A` +
+                        `_تم الإرسال عبر نظام فرز الجنوب_`;
+
+        window.open(`https://wa.me/?text=${message}`, '_blank');
+    }
+</script>
+
+</body>
+</html>
