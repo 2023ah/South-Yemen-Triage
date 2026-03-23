@@ -3,121 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>South Yemen Triage & Trauma Card</title>
+    <title>Dr. Ahmed Muthanna - South Yemen Triage</title>
     <style>
-        :root { --red: #d9534f; --yellow: #f0ad4e; --green: #5cb85c; --black: #292b2c; --blue: #0275d8; }
-        body { font-family: 'Arial', sans-serif; background: #f0f2f5; margin: 0; padding: 10px; color: #333; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 15px; border-radius: 8px; shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h2, h3 { text-align: center; color: var(--blue); border-bottom: 2px solid var(--blue); padding-bottom: 5px; }
-        section { margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
-        label { font-weight: bold; display: block; margin-top: 10px; font-size: 0.9em; }
-        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .triage-box { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }
-        .triage-box button { padding: 10px; border: none; color: white; font-weight: bold; border-radius: 4px; cursor: pointer; opacity: 0.6; }
-        .active { opacity: 1 !important; border: 2px solid #000 !important; }
-        .save-btn { background: #25D366; color: white; border: none; width: 100%; padding: 15px; border-radius: 5px; font-size: 1.1em; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        :root { --red: #d9534f; --yellow: #f0ad4e; --green: #5cb85c; --black: #292b2c; --blue: #0275d8; --danger: #ff0000; }
+        body { font-family: 'Segoe UI', sans-serif; background: #eceff1; margin: 0; padding: 10px; }
+        .container { max-width: 750px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 8px solid var(--blue); }
+        /* شريط العنوان العلوي باسمك */
+        .admin-header { background: var(--blue); color: white; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px; font-weight: bold; font-size: 1.1em; }
+        .timer-box { background: var(--black); color: #00ff00; padding: 8px; border-radius: 8px; text-align: center; font-family: monospace; font-size: 1.1em; margin-bottom: 15px; }
+        section { margin-bottom: 15px; border: 1px solid #cfd8dc; padding: 15px; border-radius: 12px; background: #fff; }
+        .critical-alert { background: #fff3f3; border: 2px solid var(--danger); animation: blink 1s infinite; padding: 10px; border-radius: 8px; display: none; margin-top: 10px; font-weight: bold; color: var(--danger); text-align: center; }
+        @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.5;} 100% {opacity: 1;} }
+        .grid-vitals { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
+        .triage-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+        .triage-btns button { padding: 18px 5px; border: none; color: white; font-weight: bold; border-radius: 10px; cursor: pointer; opacity: 0.2; font-size: 13px; }
+        .active { opacity: 1 !important; transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.4); outline: 3px solid #333; }
+        .dashboard { display: none; background: #e3f2fd; border: 3px solid var(--blue); border-radius: 15px; padding: 20px; margin-top: 20px; }
+        .wa-btn { background: #25D366; color: white; width: 100%; padding: 20px; border-radius: 10px; border: none; font-size: 1.3em; font-weight: bold; cursor: pointer; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>South Yemen Triage System</h2>
-    <p style="text-align:center; font-weight:bold;">بطاقة إصابات الحوادث (Trauma Patient Card)</p>
-
+    <div class="admin-header">Dr. Ahmed Muthanna | South Yemen Triage System</div>
+    
+    <div class="timer-box" id="timer">الوقت المنقضي: 00:00</div>
+    
     <section>
-        <h3>1. البيانات الأساسية</h3>
-        <label>اسم المصاب (إن وجد) / مجهول</label>
-        <input type="text" id="patientName" placeholder="الاسم أو الوصف">
-        <div class="grid">
-            <div><label>العمر</label><input type="number" id="age"></div>
-            <div><label>الجنس</label><select id="gender"><option>ذكر</option><option>أنثى</option></select></div>
+        <h3>1. الفرز التكتيكي (Tactical Triage)</h3>
+        <div class="triage-btns">
+            <button id="bR" style="background:var(--red)" onclick="setT('أحمر','Immediate')">IMMEDIATE</button>
+            <button id="bY" style="background:var(--yellow)" onclick="setT('أصفر','Delayed')">DELAYED</button>
+            <button id="bG" style="background:var(--green)" onclick="setT('أخضر','Minimal')">MINIMAL</button>
+            <button id="bB" style="background:var(--black)" onclick="setT('أسود')">EXPECTANT</button>
         </div>
-        <label>وقت الإصابة</label>
-        <input type="time" id="injuryTime">
+        <input type="hidden" id="tTag">
+        <div id="marchAlert" class="critical-alert">⚠️ تنبيه: حالة حرجة - بروتوكول MARCH فوراً</div>
     </section>
 
     <section>
-        <h3>2. تصنيف الحالة (Triage)</h3>
-        <div class="triage-box">
-            <button id="btn-red" style="background:var(--red)" onclick="setTriage('أحمر')">أحمر</button>
-            <button id="btn-yellow" style="background:var(--yellow)" onclick="setTriage('أصفر')">أصفر</button>
-            <button id="btn-green" style="background:var(--green)" onclick="setTriage('أخضر')">أخضر</button>
-            <button id="btn-black" style="background:var(--black)" onclick="setTriage('أسود')">أسود</button>
+        <h3>2. بيانات المصاب والموقع</h3>
+        <input type="text" id="pName" placeholder="اسم المصاب / الوصف">
+        <div class="grid-vitals" style="margin-top:10px;">
+            <select id="blood"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>مجهول</option></select>
+            <select id="moi"><option>طلق ناري</option><option>انفجار</option><option>حادث</option><option>حروق</option></select>
+            <button onclick="getLoc()" style="background:#eee; border:1px solid #ccc; border-radius:5px;">📍 تحديد الموقع</button>
         </div>
-        <input type="hidden" id="triageTag">
+        <input type="hidden" id="locData">
     </section>
 
     <section>
-        <h3>3. التدخلات الطبية المقدمة</h3>
-        <label><input type="checkbox" class="intervention" value="تأمين مجرى الهواء"> تأمين مجرى الهواء (Airway Support)</label>
-        <label><input type="checkbox" class="intervention" value="أكسجين"> أكسجين (O2 Therapy)</label>
-        <label><input type="checkbox" class="intervention" value="إيقاف نزيف/ضغط"> إيقاف نزيف / ضغط مباشر</label>
-        <label><input type="checkbox" class="intervention" value="تركيب تورنيكة"> تركيب تورنيكة (Tourniquet)</label>
-        <label><input type="checkbox" class="intervention" value="سوائل وريدية"> سوائل وريدية (IV Fluids)</label>
-        <label><input type="checkbox" class="intervention" value="تثبيت كسور"> تثبيت كسور / جبيرة</label>
+        <h3>3. العلامات الحيوية (Vitals & GCS)</h3>
+        <div class="grid-vitals">
+            <input type="number" id="hr" placeholder="النبض">
+            <input type="text" id="bp" placeholder="الضغط">
+            <input type="number" id="ox" placeholder="O2%">
+            <select id="gcs"><option value="15">GCS 15 (واعي)</option><option value="12-14">GCS 12-14</option><option value="9-11">GCS 9-11</option><option value="3-8">GCS < 9 (غيبوبة)</option></select>
+        </div>
     </section>
 
     <section>
-        <h3>4. الأدوية الممنوحة</h3>
-        <label>أدوية (نوع الجرعة ووقتها)</label>
-        <textarea id="meds" rows="2" placeholder="مثال: مورفين 5 ملج، سيفاكسون 1 جم..."></textarea>
+        <h3>4. التدخلات التكتيكية</h3>
+        <div id="itv">
+            <label><input type="checkbox" value="T-Q Applied"> تركيب تورنيكة</label>
+            <label><input type="checkbox" value="Needle Decompression"> إبرة صدر</label>
+            <label><input type="checkbox" value="TXA Given"> حمض الترانيكساميك</label>
+            <label><input type="checkbox" value="IV Fluids"> سوائل وريدية</label>
+        </div>
+        <textarea id="meds" rows="2" placeholder="الأدوية الممنوحة..."></textarea>
     </section>
 
-    <section>
-        <h3>5. الإخلاء الطبي</h3>
-        <label>المستشفى المستلم</label>
-        <select id="hospital">
-            <option>مستشفى عبود العسكري</option>
-            <option>مستشفى الجمهورية</option>
-            <option>أطباء بلا حدود</option>
-            <option>مستشفى ميداني آخر</option>
-        </select>
-        <label>حالة المصاب عند التحويل</label>
-        <select id="statusAtTransfer">
-            <option>مستقرة</option>
-            <option>غير مستقرة</option>
-            <option>متدهورة</option>
-        </select>
-    </section>
+    <button class="wa-btn" onclick="showDashboard()">مراجعة وإرسال التقرير 📊</button>
 
-    <button class="save-btn" onclick="sendToWhatsApp()">إرسال التقرير الطبي الكامل ✅</button>
+    <div id="dbView" class="dashboard">
+        <h3 style="color:var(--blue)">📋 ملخص الحالة النهائي</h3>
+        <div id="summaryContent" style="font-size:0.95em; line-height:1.6;"></div>
+        <button class="wa-btn" style="background:#075E54;" onclick="sendWA()">إرسال عبر الواتساب ✅</button>
+    </div>
 </div>
 
 <script>
-    function setTriage(color) {
-        document.getElementById('triageTag').value = color;
-        const buttons = document.querySelectorAll('.triage-box button');
-        buttons.forEach(btn => btn.classList.remove('active'));
-        if(color === 'أحمر') document.getElementById('btn-red').classList.add('active');
-        if(color === 'أصفر') document.getElementById('btn-yellow').classList.add('active');
-        if(color === 'أخضر') document.getElementById('btn-green').classList.add('active');
-        if(color === 'أسود') document.getElementById('btn-black').classList.add('active');
+    let startTime = Date.now();
+    setInterval(() => {
+        let diff = Math.floor((Date.now() - startTime) / 1000);
+        let m = Math.floor(diff/60).toString().padStart(2,'0');
+        let s = (diff%60).toString().padStart(2,'0');
+        document.getElementById('timer').innerText = `الوقت المنقضي: ${m}:${s}`;
+    }, 1000);
+
+    function getLoc() {
+        navigator.geolocation.getCurrentPosition(p => {
+            document.getElementById('locData').value = `${p.coords.latitude},${p.coords.longitude}`;
+            alert("تم تحديد الموقع بنجاح");
+        }, (err) => { alert("يرجى تفعيل نظام الموقع GPS"); });
     }
 
-    function sendToWhatsApp() {
-        const name = document.getElementById('patientName').value || "غير معروف";
-        const tag = document.getElementById('triageTag').value || "غير محدد";
-        const meds = document.getElementById('meds').value;
-        const hospital = document.getElementById('hospital').value;
-        
-        let interventions = [];
-        document.querySelectorAll('.intervention:checked').forEach(i => interventions.push(i.value));
+    function setT(c, eng) {
+        document.getElementById('tTag').value = c;
+        document.querySelectorAll('.triage-btns button').forEach(b => b.classList.remove('active'));
+        if(c==='أحمر') document.getElementById('bR').classList.add('active');
+        if(c==='أصفر') document.getElementById('bY').classList.add('active');
+        if(c==='أخضر') document.getElementById('bG').classList.add('active');
+        if(c==='أسود') document.getElementById('bB').classList.add('active');
+        document.getElementById('marchAlert').style.display = (c==='أحمر') ? 'block' : 'none';
+    }
 
-        const message = `*تقرير إصابة - South Yemen Triage*%0A` +
-                        `------------------------------%0A` +
-                        `*المصاب:* ${name}%0A` +
-                        `*التصنيف:* ${tag}%0A` +
-                        `*التدخلات:* ${interventions.join('، ') || 'لا يوجد'}%0A` +
-                        `*الأدوية:* ${meds || 'لا يوجد'}%0A` +
-                        `*الوجهة:* ${hospital}%0A` +
-                        `*الحالة عند النقل:* ${document.getElementById('statusAtTransfer').value}%0A` +
-                        `------------------------------%0A` +
-                        `_تم الإرسال عبر نظام فرز الجنوب_`;
+    function showDashboard() {
+        const d = document.getElementById('dbView');
+        const c = document.getElementById('summaryContent');
+        d.style.display = 'block';
+        c.innerHTML = `
+            <b>المشرف العام:</b> Dr. Ahmed Muthanna<br>
+            <b>المصـاب:</b> ${document.getElementById('pName').value || 'مجهول'}<br>
+            <b>التصنيف:</b> ${document.getElementById('tTag').value}<br>
+            <b>الفصيلة:</b> ${document.getElementById('blood').value}<br>
+            <b>المؤشرات الحيوية:</b> نبض:${document.getElementById('hr').value} | ضغط:${document.getElementById('bp').value} | أكسجين:${document.getElementById('ox').value}%<br>
+            <b>مستوى الوعي:</b> GCS ${document.getElementById('gcs').value}<br>
+            <b>الوقت المستغرق:</b> ${document.getElementById('timer').innerText}
+        `;
+        d.scrollIntoView({behavior:'smooth'});
+    }
 
-        window.open(`https://wa.me/?text=${message}`, '_blank');
+    function sendWA() {
+        const msg = `*Dr. Ahmed Muthanna - Trauma Report*%0A` +
+                    `--------------------------%0A` +
+                    `*Status:* [${document.getElementById('tTag').value}]%0A` +
+                    `*Patient:* ${document.getElementById('pName').value || 'Unknown'}%0A` +
+                    `*Blood:* ${document.getElementById('blood').value}%0A` +
+                    `*Vitals:* HR ${document.getElementById('hr').value} / BP ${document.getElementById('bp').value}%0A` +
+                    `*GCS:* ${document.getElementById('gcs').value}%0A` +
+                    `*Time in Field:* ${document.getElementById('timer').innerText}%0A` +
+                    `*Location:* https://www.google.com/maps?q=${document.getElementById('locData').value}%0A` +
+                    `--------------------------%0A` +
+                    `_South Yemen Field Triage System_`;
+        window.open(`https://wa.me/?text=${msg}`, '_blank');
     }
 </script>
-
 </body>
 </html>
